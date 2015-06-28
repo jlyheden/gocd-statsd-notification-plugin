@@ -1,0 +1,44 @@
+{
+  "pipeline": {
+    "name": "pipeline-name",
+    "counter": "1",
+    "group": "pipeline-group",
+    "build-cause": [
+      {
+        "material": {
+
+        },
+        "changed": true,
+        "modifications": [
+          {
+            "revision": "1",
+            "modified-time": "2015-03-24T14:53:55.127Z",
+            "data": {
+
+            }
+          }
+        ]
+      }
+    ],
+    "stage": {
+      "name": "stage-name",
+      "counter": "1",
+      "approval-type": "success",
+      "approved-by": "changes",
+      "state": "Building",
+      "result": "Unknown",
+      "create-time": "2011-07-13T19:43:37.100Z",
+      "last-transition-time": "2011-07-13T19:43:37.100Z",
+      "jobs": [
+        {
+          "name": "job-name",
+          "schedule-time": "2011-07-13T19:43:37.100Z",
+          "complete-time": "",
+          "state": "Completed",
+          "result": "Passed",
+          "agent-uuid": "uuid"
+        }
+      ]
+    }
+  }
+}

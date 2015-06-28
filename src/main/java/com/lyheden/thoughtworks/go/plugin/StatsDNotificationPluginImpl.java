@@ -10,11 +10,8 @@ import com.thoughtworks.go.plugin.api.exceptions.UnhandledRequestTypeException;
 import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
-import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 import java.util.*;
-
-import static java.util.Arrays.asList;
 
 /**
  * Created by johan on 27/06/15.
@@ -33,7 +30,7 @@ public class StatsDNotificationPluginImpl implements GoPlugin {
     public static final int SUCCESS_RESPONSE_CODE = 200;
     public static final int INTERNAL_ERROR_RESPONSE_CODE = 500;
 
-    private static final StatsDClient statsDClient = new NonBlockingStatsDClient("pipeline.notification", "localhost", 8125);
+    private static StatsDClient statsDClient = StatsDClientFactory.getNonBlockingStatsDClient();
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
@@ -63,28 +60,42 @@ public class StatsDNotificationPluginImpl implements GoPlugin {
     }
 
     private GoPluginApiResponse handleStageNotification(GoPluginApiRequest goPluginApiRequest) {
-        LOGGER.info("Handling stage notifications");
+        LOGGER.debug("Handling stage notifications");
         int responseCode = SUCCESS_RESPONSE_CODE;
         Map<String, Object> response = new HashMap<>();
         List<String> messages = new ArrayList<>();
         try {
             String requestBody = goPluginApiRequest.requestBody();
-            LOGGER.info("RequestBody from go: " + requestBody);
+            LOGGER.debug("RequestBody from go: " + requestBody);
             StageStatus stageStatus = new GsonBuilder().create().fromJson(requestBody, StageStatus.class);
 
-            LOGGER.info("StageStatus object: " + stageStatus);
-            statsDClient.increment(stageStatus.getPipeline().getStageNameExecution());
-            statsDClient.increment(stageStatus.getPipeline().getStageStateItemName());
-            statsDClient.increment(stageStatus.getPipeline().getStageResultItemName());
+            statsDClient.increment(stageStatus.getStageNameExecution());
+            messages.add("Incremented metric " + stageStatus.getStageNameExecution());
 
-            for (Map<String, Long> map : stageStatus.getPipeline().getJobsElapsedTime()) {
+            statsDClient.increment(stageStatus.getStageStateItemName());
+            messages.add("Incremented metric " + stageStatus.getStageStateItemName());
+
+            statsDClient.increment(stageStatus.getStageResultItemName());
+            messages.add("Incremented metric " + stageStatus.getStageResultItemName());
+
+            if (!stageStatus.getPipeline().getStage().getLastTransitionTime().isEmpty()) {
+                for (Map.Entry<String, Long> entry : stageStatus.getStageExecutionTime().entrySet()) {
+                    statsDClient.recordExecutionTime(entry.getKey(), entry.getValue());
+                    statsDClient.gauge(entry.getKey(), entry.getValue());
+                    messages.add("Recorded stage execution time key " + entry.getKey() + " value " + String.valueOf(entry.getValue()));
+                }
+            }
+
+            for (Map<String, Long> map : stageStatus.getJobsElapsedTime()) {
                 for (Map.Entry<String, Long> entry : map.entrySet()) {
                     statsDClient.recordExecutionTime(entry.getKey(), entry.getValue());
+                    statsDClient.gauge(entry.getKey(), entry.getValue());
+                    messages.add("Recorded execution time key " + entry.getKey() + " value " + String.valueOf(entry.getValue()));
                 }
             }
 
             response.put("status", "success");
-            messages.add("Pushed values to statsd");
+            LOGGER.info("Pushed metrics to StatsD for pipeline " + stageStatus.getPipeline().getName() + " stage " + stageStatus.getPipeline().getStage().getName());
         } catch (Exception e) {
             LOGGER.error("Exception while serializing request from Go", e);
             responseCode = INTERNAL_ERROR_RESPONSE_CODE;
