@@ -33,13 +33,10 @@ public class StatsDNotificationPluginImpl implements GoPlugin {
     public static final int SUCCESS_RESPONSE_CODE = 200;
     public static final int INTERNAL_ERROR_RESPONSE_CODE = 500;
 
-    private StatsDClient statsDClient;
+    private static final StatsDClient statsDClient = new NonBlockingStatsDClient("pipeline.notification", "localhost", 8125);
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
-        //this.goApplicationAccessor = goApplicationAccessor;
-        LOGGER.info("Setting up statsd client");
-        statsDClient = new NonBlockingStatsDClient("pipeline.notification", "localhost", 8125);
     }
 
     @Override
