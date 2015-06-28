@@ -3,6 +3,8 @@ package com.lyheden.thoughtworks.go.plugin.domain;
 import com.google.gson.annotations.SerializedName;
 import org.joda.time.DateTime;
 
+import java.util.Date;
+
 /**
  * Created by johan on 27/06/15.
  */
@@ -16,8 +18,8 @@ public class Stage {
 
     @SerializedName("approval-type") private String approvalType;
     @SerializedName("approved-by") private String approvedBy;
-    @SerializedName("create-time") private DateTime createTime;
-    @SerializedName("last-transition-time") private DateTime lastTransitionTime;
+    @SerializedName("create-time") private String createTime;
+    @SerializedName("last-transition-time") private String lastTransitionTime;
 
     public String getName() {
         return name;
@@ -75,19 +77,19 @@ public class Stage {
         this.approvedBy = approvedBy;
     }
 
-    public DateTime getCreateTime() {
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(DateTime createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 
-    public DateTime getLastTransitionTime() {
+    public String getLastTransitionTime() {
         return lastTransitionTime;
     }
 
-    public void setLastTransitionTime(DateTime lastTransitionTime) {
+    public void setLastTransitionTime(String lastTransitionTime) {
         this.lastTransitionTime = lastTransitionTime;
     }
 

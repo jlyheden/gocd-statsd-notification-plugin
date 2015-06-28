@@ -2,6 +2,8 @@ package com.lyheden.thoughtworks.go.plugin.domain;
 
 import com.google.gson.annotations.SerializedName;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Created by johan on 27/06/15.
@@ -12,9 +14,11 @@ public class Job {
     private String state;
     private String result;
 
-    @SerializedName("schedule-time") private DateTime scheduleTime;
-    @SerializedName("complete-time") private DateTime completeTime;
+    @SerializedName("schedule-time") private String scheduleTime;
+    @SerializedName("complete-time") private String completeTime;
     @SerializedName("agent-uuid") private String agentUuid;
+
+    private final static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public String getName() {
         return name;
@@ -40,19 +44,19 @@ public class Job {
         this.result = result;
     }
 
-    public DateTime getScheduleTime() {
+    public String getScheduleTime() {
         return scheduleTime;
     }
 
-    public void setScheduleTime(DateTime scheduleTime) {
+    public void setScheduleTime(String scheduleTime) {
         this.scheduleTime = scheduleTime;
     }
 
-    public DateTime getCompleteTime() {
+    public String getCompleteTime() {
         return completeTime;
     }
 
-    public void setCompleteTime(DateTime completeTime) {
+    public void setCompleteTime(String completeTime) {
         this.completeTime = completeTime;
     }
 
@@ -65,7 +69,9 @@ public class Job {
     }
 
     public long getRunningTime() {
-        return completeTime.getMillis() - scheduleTime.getMillis();
+        DateTime completeTimeDateTime = formatter.parseDateTime(completeTime);
+        DateTime scheduleTimeDateTime = formatter.parseDateTime(scheduleTime);
+        return completeTimeDateTime.getMillis() - scheduleTimeDateTime.getMillis();
     }
 
 }

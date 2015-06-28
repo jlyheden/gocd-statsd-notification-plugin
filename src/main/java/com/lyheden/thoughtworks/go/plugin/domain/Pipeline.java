@@ -18,7 +18,7 @@ public class Pipeline {
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
@@ -66,9 +66,11 @@ public class Pipeline {
     public List<Map<String, Long>> getJobsElapsedTime() {
         List<Map<String, Long>> list = new ArrayList<>();
         for (Job job : stage.getJobs()) {
-            Map map = new HashMap<>();
-            map.put(getStageName() + ".job." + job.getName() + ".time", job.getRunningTime());
-            list.add(map);
+            if (!job.getCompleteTime().equals("")) {
+                Map<String, Long> map = new HashMap<>();
+                map.put(getStageName() + ".job." + job.getName() + ".time", job.getRunningTime());
+                list.add(map);
+            }
         }
         return list;
     }
